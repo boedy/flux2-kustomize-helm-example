@@ -11,6 +11,6 @@ master:
 replica:
   persistence:
     enabled: false
-  replicaCount: 2
+  replicaCount: 3
 sentinel:
   enabled: true
