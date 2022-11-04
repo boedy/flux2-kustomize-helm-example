@@ -1,11 +1,5 @@
 # Default values
 # https://github.com/bitnami/charts/blob/master/bitnami/redis/values.yaml
 usePassword: false
-auth:
-  enabled: false
-  sentinel: false
-master:
-  persistence:
-    enabled: false
-sentinel:
-  enabled: true
+cluster:
+  nodes: 6
