@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/upstream-hash-by: $uri
+  name: contentproxy
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: tunes.kllkt.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: media-proxy-cache
+            port:
+              number: 80
+        pathType: ImplementationSpecific
+  tls:
+  - hosts:
+    - '*.kllkt.com'
+    secretName: star-kllkt-com

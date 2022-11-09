@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: media-proxy-cache
+  name: media-proxy-cache
+  namespace: default
+spec:
+  replicas: 2
+  serviceName: media-proxy-cache
+  template:
+    metadata:
+      annotations:
+        log.config.scalyr.com/attributes.parser: accessLog
+        log.config.scalyr.com/include: "true"
+        log.config.scalyr.com/rename-logfile: /content-proxy/access.log
+      labels:
+        app: media-proxy-cache
+    spec:
+      affinity: {}
+      containers:
+      - env:
+        - name: JWT_SECRET
+          value: Mede4Zddo0PTKriwmxftzbhRRICgkAMP
+        - name: AWS_ACCESS_KEY_ID
+          value: 3KLZ52EKAULOG7ZJC3ME
+        - name: AWS_SECRET_ACCESS_KEY
+          value: c+jSLgrPaTX1YEun6lDX+AX4qhhyh/EFNpuK2YEFQMM
+        - name: AWS_BUCKET_REGION
+          value: ams3
+        image: kollekt/jwt-reversed-proxy:latest
+        imagePullPolicy: Always
+        name: nginx
+        ports:
+        - containerPort: 80
+          name: web
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/www/files
+          name: media-cache-files
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        doks.digitalocean.com/node-pool: media-proxy
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      name: media-cache-files
+      namespace: main-api
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Gi
+      storageClassName: retained-storage
+      volumeMode: Filesystem
